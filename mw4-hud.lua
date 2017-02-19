@@ -150,6 +150,48 @@ draw_hud = function ()
 		gui.box  (0, 0, 319, 223, {255, 0, 0, 128}, {255, 0, 0, 255})
 	end
 
+	local alphas = {outline=255, fill=128}
+	local color_list = {
+		[        0]={outline={255,255,255,alphas.outline}, fill={255,255,255,alphas.fill}},
+		[        4]={outline={255,  0,  0,alphas.outline}, fill={255,  0,  0,alphas.fill}},
+		[        8]={outline={  0,255,  0,alphas.outline}, fill={  0,255,  0,alphas.fill}},
+		[       12]={outline={255,255,  0,alphas.outline}, fill={255,255,  0,alphas.fill}},
+		["special"]={outline={255,  0,255,alphas.outline}, fill={255,  0,255,alphas.fill}},
+		[ "simple"]={outline={  0,255,255,alphas.outline}, fill={  0,255,255,alphas.fill}},
+	}
+	local camX = memory.readlong(0xffffc73a)
+	local camY = memory.readlong(0xffffc746)
+	for offset = 0,0x104,4 do
+		local value = memory.readbytesigned(offset + 0xffff9f1a)
+		if value < 0 then
+			local type = memory.readbyte(offset + 0xffffb25f)
+			local color
+			local routine
+			if offset <= 8 then
+				color = color_list[0]
+				routine = memory.readword(offset + 0xffffb466)
+			elseif offset <= 0x30 then
+				color = color_list["simple"]
+				routine = memory.readbyte(offset + 0xffffb466)
+			elseif offset <= 0x80 then
+				color = color_list[type]
+				routine = memory.readbyte(offset + 0xffffb466) * 256 + memory.readbyte(offset + 0xffffb260)
+			else
+				color = color_list["special"]
+				routine = memory.readword(offset + 0xffffbf78)
+			end
+			local xpos = math.floor((memory.readlong(offset + 0xffffa122) - camX) / 65536)
+			local ypos = math.floor((memory.readlong(offset + 0xffffa226) - camY) / 65536)
+			if color ~= nil then
+				local xlen = memory.readbyte(offset + 0xffffad4a)
+				local ylen = memory.readbyte(offset + 0xffffad4b)
+				gui.box(xpos - xlen, ypos - ylen, xpos + xlen, ypos + ylen, color.fill, color.outline)
+			end
+			--gui.text(xpos-7, ypos-7, string.format("%02X%02X\n%04X", offset, type, routine), 'white', 'black')
+			gui.text(xpos-3, ypos-3, string.format("%02X", offset), 'white', 'black')
+		end
+	end
+
 	--	Basic game HUD
 	game_hud = main_hud:draw()
 
