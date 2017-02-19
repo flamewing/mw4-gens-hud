@@ -22,23 +22,17 @@
 
 require("mw4/common/rom-check")
 
+local ns, ts, bs, rs, ls = 0, 1, 2, 4, 8
 local color_table = {
-	[0x0]={  0,  0,  0,128}, --                      : black
-	[0x1]={128,  0,  0,128}, -- top                  : maroon
-	[0x2]={  0,128,  0,128}, --     bottom           : green
-	[0x3]={128,128,  0,128}, -- top bottom           : olive
-	[0x4]={  0,  0,128,128}, --            right     : navy
-	[0x5]={128,  0,128,128}, -- top        right     : purple
-	[0x6]={  0,128,128,128}, --     bottom right     : teal
-	[0x7]={192,192,192,128}, -- top bottom right     : silver
-	[0x8]={128,128,128,128}, --                  left: gray
-	[0x9]={255,  0,  0,128}, -- top              left: red
-	[0xa]={  0,255,  0,128}, --     bottom       left: lime
-	[0xb]={255,255,  0,128}, -- top bottom       left: yellow
-	[0xc]={  0,  0,255,128}, --            right left: blue
-	[0xd]={255,  0,255,128}, -- top        right left: fuchsia
-	[0xe]={  0,255,255,128}, --     bottom right left: aqua
-	[0xf]={255,255,255,128}, -- top bottom right left: white
+	[ns+ns+ns+ns]={  0,  0,  0,128}, -- ---- solid 0x0 black
+	[ts+ns+ns+ns]={  0,128,  0,128}, -- t--- solid 0x1 green
+	[ns+ns+rs+ns]={128,  0,  0,128}, -- --r- solid 0x4 maroon
+	[ts+ns+rs+ns]={128,128,  0,128}, -- t-r- solid 0x5 olive
+	[ns+ns+ns+ls]={  0,  0,128,128}, -- ---l solid 0x8 navy
+	[ts+ns+ns+ls]={  0,128,128,128}, -- t--l solid 0x9 teal
+	[ns+ns+rs+ls]={128,  0,128,128}, -- --rl solid 0xc purple
+	[ts+ns+rs+ls]={128,128,128,128}, -- t-rl solid 0xd gray
+	[ts+bs+rs+ls]={255,255,255,128}, -- tbrl solid 0xf white
 }
 
 function draw_terrain()
@@ -49,35 +43,19 @@ function draw_terrain()
 	local camWordX = memory.readword(0xffffc73a)
 	local camWordY = memory.readword(0xffffc746)
 	local s0 = memory.readbytesigned(0xffffcc70)
-	local s1 = (memory.readbyte(0xffffad4d) ~= 1) and 1 or 0
+	local s1 = (memory.readbyte(0xffffad4d) ~= 1) and ts or ns
 	local s2 = memory.readbyte(0xffffad4c)
-	local s3 = (memory.readbyte(0xffffad4d) == 0 and s0 < 0) and 1 or 0
-	local s4 = (s0 >= 0 and s2 == 0) and 4 or 0
-	local s5 = (s0 < 0) and 8 or 0
-	local is_floor_table = {
-		[0x0]= 0, [0x1]= 1, [0x2]= 0, [0x3]= 1,
-		[0x4]=s1, [0x5]= 0, [0x6]= 0, [0x7]= 0,
-		[0x8]=s3, [0x9]= 1, [0xa]= 0, [0xb]= 0,
-		[0xc]= 1, [0xd]= 1, [0xe]=s1, [0xf]= 1,
+	local s3 = (memory.readbyte(0xffffad4d) == 0 and s0 < 0) and ts or ns
+	local s4 = (s0 >= 0 and s2 == 0) and rs or ns
+	local s5 = (s0 < 0) and ls or ns
+	local solid_flags = {
+		--     ts bs rs ls         ts bs rs ls         ts bs rs ls         ts bs rs ls
+		[0x0]= ns+ns+ns+ns, [0x1]= ts+bs+rs+ls, [0x2]= ns+ns+ns+ns, [0x3]= ts+bs+rs+ls,
+		[0x4]= s1+ns+ns+ns, [0x5]= ns+ns+ns+ns, [0x6]= ns+ns+ns+ns, [0x7]= ns+ns+ns+ns,
+		[0x8]= s3+ns+s4+s5, [0x9]= ts+ns+ns+ns, [0xa]= ns+ns+ns+ns, [0xb]= ns+ns+ns+ns,
+		[0xc]= ts+bs+rs+ls, [0xd]= ts+bs+rs+ls, [0xe]= s1+ns+ns+ns, [0xf]= ts+bs+rs+ls,
 	}
-	local is_ceiling_table = {
-		[0x0]= 0, [0x1]= 2, [0x2]= 0, [0x3]= 2,
-		[0x4]= 0, [0x5]= 0, [0x6]= 0, [0x7]= 0,
-		[0x8]= 0, [0x9]= 0, [0xa]= 0, [0xb]= 0,
-		[0xc]= 2, [0xd]= 2, [0xe]= 0, [0xf]= 2,
-	}
-	local is_rightwall_table = {
-		[0x0]= 0, [0x1]= 4, [0x2]= 0, [0x3]= 4,
-		[0x4]= 0, [0x5]= 0, [0x6]= 0, [0x7]= 0,
-		[0x8]=s4, [0x9]= 0, [0xa]= 0, [0xb]= 0,
-		[0xc]= 4, [0xd]= 4, [0xe]= 0, [0xf]= 4,
-	}
-	local is_leftwall_table = {
-		[0x0]= 0, [0x1]= 8, [0x2]= 0, [0x3]= 8,
-		[0x4]= 0, [0x5]= 0, [0x6]= 0, [0x7]= 0,
-		[0x8]=s5, [0x9]= 0, [0xa]= 0, [0xb]= 0,
-		[0xc]= 8, [0xd]= 8, [0xe]= 0, [0xf]= 8,
-	}
+
 	for ii=0,256,16 do
 		local xx = AND(camWordX + ii, 0xfff0)
 		local initx = xx - camWordX
@@ -100,8 +78,7 @@ function draw_terrain()
 			yy = SHIFT(AND(yy - 0x1000, 0xfff0), terrain_shift)
 			local terrain_byte = AND(memory.readword(table_ptr + yy + xx), 0x3ff)
 			local terrain_type = memory.readbyte(0xffff6000 + terrain_byte)
-			local index = is_floor_table[terrain_type] + is_ceiling_table[terrain_type]
-						+ is_leftwall_table[terrain_type] + is_rightwall_table[terrain_type]
+			local index = solid_flags[terrain_type]
 			if index ~= 0 then
 				local color = color_table[index]
 				gui.box(initx, inity, endx, endy, color, color)
