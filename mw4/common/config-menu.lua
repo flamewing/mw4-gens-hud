@@ -151,6 +151,20 @@ function Config_menu:construct(x, y, w, h, draw_fun, active)
 		function()
 			return boss_hud_active
 		end, "Show Boss HUD", 9, boss_hud_active), 0, 66)
+	cond:add(make_emerald_toggle(
+		function(self)
+			show_hitboxes = not show_hitboxes
+		end, nil,
+		function()
+			return show_hitboxes
+		end, "Show Hitboxes", 9, show_hitboxes), 0, 77)
+	cond:add(make_emerald_toggle(
+		function(self)
+			show_terrain = not show_terrain
+		end, nil,
+		function()
+			return show_terrain
+		end, "Show Terrain", 9, show_terrain), 0, 88)
 	fra0:add(cond, 2, 7 + 11)
 	self:add(fra0, 2, 5)
 
