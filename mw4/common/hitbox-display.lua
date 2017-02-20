@@ -35,7 +35,7 @@ local color_list = {
 function draw_hitboxes()
 	local camX = memory.readlong(0xffffc73a)
 	local camY = memory.readlong(0xffffc746)
-	for offset = 0,0x104,4 do
+	for offset = 0x104,0,-4 do
 		local value = memory.readbytesigned(offset + 0xffff9f1a)
 		if value < 0 then
 			local type = memory.readbyte(offset + 0xffffb25f)
@@ -68,8 +68,8 @@ function draw_hitboxes()
 			else
 				print(string.format("Error: invalid color for offset %02X", offset))
 			end
-			--gui.text(xpos-7, ypos-7, string.format("%02X%02X\n%04X", offset, type, routine), 'white', 'black')
-			gui.text(xpos-3, ypos-3, string.format("%02X", offset), 'white', 'black')
+			gui.text(xpos-7, ypos-7, string.format("%02X%02X\n%04X", offset, type, routine), 'white', 'black')
+			--gui.text(xpos-3, ypos-3, string.format("%02X", offset), 'white', 'black')
 		end
 	end
 end
