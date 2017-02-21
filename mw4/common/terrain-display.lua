@@ -16,7 +16,7 @@
 --------------------------------------------------------------------------------
 
 --------------------------------------------------------------------------------
---	Jump predictor.
+--	Terrain solidity display.
 --	Written by: Marzo Junior
 --------------------------------------------------------------------------------
 
@@ -35,33 +35,39 @@ local color_table = {
 	[ts+bs+rs+ls]={255,255,255,128}, -- tbrl solid 0xf white
 }
 
+-- nil entries get filled in dynamically later
+local solid_flags = {
+	--     ts bs rs ls         ts bs rs ls         ts bs rs ls         ts bs rs ls
+	[0x0]= ns+ns+ns+ns, [0x1]= ts+bs+rs+ls, [0x2]= ns+ns+ns+ns, [0x3]= ts+bs+rs+ls,
+	[0x4]= nil        , [0x5]= ns+ns+ns+ns, [0x6]= ns+ns+ns+ns, [0x7]= ns+ns+ns+ns,
+	[0x8]= nil        , [0x9]= ts+ns+ns+ns, [0xa]= ns+ns+ns+ns, [0xb]= ns+ns+ns+ns,
+	[0xc]= ts+bs+rs+ls, [0xd]= ts+bs+rs+ls, [0xe]= nil        , [0xf]= ts+bs+rs+ls,
+}
+
 function draw_terrain()
-	local valX = memory.readword(0xffffc72e)
-	local valY = memory.readword(0xffffc730)
-	local table_ptr = memory.readlong(0xffffc722)
-	local terrain_shift = -memory.readbyte(0xffffc717)
 	local camWordX = memory.readword(0xffffc73a)
 	local camWordY = memory.readword(0xffffc746)
+	local minX = memory.readword(0xffffc72e)
+	local minY = memory.readword(0xffffc730)
+	local table_ptr = memory.readlong(0xffffc722)
+	local terrain_shift = -memory.readbyte(0xffffc717)
+	-- Patch in dynamic solidity of tiles
 	local s0 = memory.readbytesigned(0xffffcc70)
-	local s1 = (memory.readbyte(0xffffad4d) ~= 1) and ts or ns
-	local s2 = memory.readbyte(0xffffad4c)
-	local s3 = (memory.readbyte(0xffffad4d) == 0 and s0 < 0) and ts or ns
-	local s4 = (s0 >= 0 and s2 == 0) and rs or ns
+	local s1 = memory.readbyte(0xffffad4d)
+	local s2 = (s1 ~= 1) and ts or ns
+	local s3 = (s1 == 0 and s0 < 0) and ts or ns
+	local s4 = (s0 >= 0 and memory.readbyte(0xffffad4c) == 0) and rs or ns
 	local s5 = (s0 < 0) and ls or ns
-	local solid_flags = {
-		--     ts bs rs ls         ts bs rs ls         ts bs rs ls         ts bs rs ls
-		[0x0]= ns+ns+ns+ns, [0x1]= ts+bs+rs+ls, [0x2]= ns+ns+ns+ns, [0x3]= ts+bs+rs+ls,
-		[0x4]= s1+ns+ns+ns, [0x5]= ns+ns+ns+ns, [0x6]= ns+ns+ns+ns, [0x7]= ns+ns+ns+ns,
-		[0x8]= s3+ns+s4+s5, [0x9]= ts+ns+ns+ns, [0xa]= ns+ns+ns+ns, [0xb]= ns+ns+ns+ns,
-		[0xc]= ts+bs+rs+ls, [0xd]= ts+bs+rs+ls, [0xe]= s1+ns+ns+ns, [0xf]= ts+bs+rs+ls,
-	}
+	solid_flags[0x4] = s2+ns+ns+ns
+	solid_flags[0x8] = s3+ns+s4+s5
+	solid_flags[0xe] = s2+ns+ns+ns
 
 	for ii=0,256,16 do
 		local xx = AND(camWordX + ii, 0xfff0)
 		local initx = xx - camWordX
 		local endx = initx + 15
-		if xx >= valX then
-			xx = valX
+		if xx >= minX then
+			xx = minX
 		elseif xx < 0x1000 then
 			xx = 0x1000
 		end
@@ -70,8 +76,8 @@ function draw_terrain()
 			local yy = AND(camWordY + jj, 0xfff0)
 			local inity = yy - camWordY
 			local endy = inity + 15
-			if yy >= valY then
-				yy = valY
+			if yy >= minY then
+				yy = minY
 			elseif yy < 0x1000 then
 				yy = 0x1000
 			end

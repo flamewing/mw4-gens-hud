@@ -16,7 +16,7 @@
 --------------------------------------------------------------------------------
 
 --------------------------------------------------------------------------------
---	Jump predictor.
+--	Hitbox display.
 --	Written by: Marzo Junior
 --------------------------------------------------------------------------------
 
@@ -42,16 +42,16 @@ function draw_hitboxes()
 			local color
 			local routine
 			if offset <= 8 then
-				color = color_list["main"]
+				color = color_list.main
 				routine = memory.readword(offset + 0xffffb466)
 			elseif offset <= 0x30 then
-				color = color_list["simple"]
+				color = color_list.simple
 				routine = memory.readbyte(offset + 0xffffb466)
 			elseif offset <= 0x80 then
 				color = color_list[type]
 				routine = memory.readbyte(offset + 0xffffb466) * 256 + memory.readbyte(offset + 0xffffb260)
 			else
-				color = color_list["special"]
+				color = color_list.special
 				routine = memory.readword(offset + 0xffffbf78)
 			end
 			local xpos = math.floor((memory.readlong(offset + 0xffffa122) - camX) / 65536)
@@ -76,30 +76,30 @@ function draw_hitboxes()
 				local frame_data = nil
 				if attack_mode == 2 then -- swing down
 					frame_data = {["first"]=  2,
-					               ["last"]=   4,
-					               [0]={ -1, 13, 22, 14},
-					               [1]={ -1, 13, 22, 14},
-					               [2]={ -1, 13, 22, 14}}
+					              ["last"]=   4,
+					              [0]={ -1, 13, 22, 14},
+					              [1]={ -1, 13, 22, 14},
+					              [2]={ -1, 13, 22, 14}}
 				elseif attack_mode == 6 then -- swing up
 					frame_data = {["first"]=  1,
-					               ["last"]=   3,
-					               [0]={  7,  9, -4, 12},
-					               [1]={  4, 13,-17, 14},
-					               [2]={  4, 13,-17, 14}}
+					              ["last"]=   3,
+					              [0]={  7,  9, -4, 12},
+					              [1]={  4, 13,-17, 14},
+					              [2]={  4, 13,-17, 14}}
 				elseif attack_mode == 8 then -- swing forward, on air
 					frame_data = {["first"]=  1,
-					               ["last"]=   4,
-					               [0]={ 15, 12, -5,  8},
-					               [1]={ 20, 14, 13,  8},
-					               [2]={ -2, 14, -7,  8},
-					               [3]={-15, 14, -1,  8},
-					               [4]={-21, 11, -7,  8}}
+					              ["last"]=   4,
+					              [0]={ 15, 12, -5,  8},
+					              [1]={ 20, 14, 13,  8},
+					              [2]={ -2, 14, -7,  8},
+					              [3]={-15, 14, -1,  8},
+					              [4]={-21, 11, -7,  8}}
 				elseif attack_mode == 10 then -- swing forward, on ground
 					frame_data = {["first"]=  1,
-					               ["last"]=   3,
-					               [0]={ 17,  8, -4,  8},
-					               [1]={ 27, 14, -2,  8},
-					               [2]={ 17, 16,  3,  8}}
+					              ["last"]=   3,
+					              [0]={ 17,  8, -4,  8},
+					              [1]={ 27, 14, -2,  8},
+					              [2]={ 17, 16,  3,  8}}
 				end
 				if frame_data ~= nil then
 					local anim_frame = memory.readbyte(0xffffaa44)
