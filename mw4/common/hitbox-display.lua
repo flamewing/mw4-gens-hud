@@ -135,10 +135,9 @@ function draw_hitboxes()
 							treasure = 4 * treasure
 							local min = memory.readword(treasure + 0x298C8)
 							local max = min + memory.readword(treasure + 0x298C6)
-							text = string.format("  %02x\n  %02d", offset, timer)
+							local text = string.format("  %02x\n  %02d", offset, timer)
 							gui.text(xpos-11, ypos-11, text, 'white', 'black')
-							text = string.format("  %02x\n  %02d", offset, timer)
-							local text = string.format("%d-%d", min, max)
+							text = string.format("%d-%d", min, max)
 							if max < 10 then
 								gui.text(xpos-5, ypos+5, text, 'white', 'black')
 							elseif max < 100 then
