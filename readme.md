@@ -20,7 +20,7 @@ Extract all the contents of the distributed package somewhere you like. Open a
 supported ROM in Gens, then start 'mw4-hud.lua'.
 
 ## 3 Features
-- **basic information display:**position (down to subpixels) and speed (for both
+- **basic information display:** position (down to subpixels) and speed (for both
 Asha and Pepe), hearts (including blue), life drops, gold, post-hit
 invulnerability counter and Pepe's level.
 - **infinite jump automation:** with Pepe one frame away from being grabbed,
