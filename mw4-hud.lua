@@ -58,8 +58,8 @@ require("mw4/common/boss-hud")
 --------------------------------------------------------------------------------
 --	HUD components: status icons, character HUDs, boss HUDs.
 --------------------------------------------------------------------------------
-Asha = Character:new(true , "asha")
-Pepe = Character:new(false, "pepe")
+Asha = Character:new(0, "asha")
+Pepe = Character:new(4, "pepe")
 local status_huds = Status_widget:new(119, 0, stat_hud)
 local char_huds = {
 	[1] = Character_hud:new(Asha, 0, 198, active_char_huds[1]),

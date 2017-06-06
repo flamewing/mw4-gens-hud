@@ -27,7 +27,7 @@ local state = savestate.create()
 local buttons = {C=true}
 
 function want_prediction()
-	return enable_predictor and (movie.recording() or not movie.playing())
+	return enable_predictor and game:level_active() and (movie.recording() or not movie.playing())
 end
 
 function predict_jumps()
